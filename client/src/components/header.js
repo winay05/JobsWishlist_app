@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import axios from "axios";
-import "./../shared/main.css";
+import React, { Component } from 'react';
+import axios from 'axios';
+import './../shared/main.css';
 import {
   Navbar,
   NavbarBrand,
@@ -16,16 +16,16 @@ import {
   Form,
   FormGroup,
   Input,
-  Label,
-} from "reactstrap";
-import { NavLink } from "react-router-dom";
+  Label
+} from 'reactstrap';
+import { NavLink } from 'react-router-dom';
 class Header extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       isNavOpen: false,
-      isModalOpen: false,
+      isModalOpen: false
     };
     this.toggleNav = this.toggleNav.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
@@ -34,12 +34,12 @@ class Header extends Component {
 
   toggleNav() {
     this.setState({
-      isNavOpen: !this.state.isNavOpen,
+      isNavOpen: !this.state.isNavOpen
     });
   }
   toggleModal() {
     this.setState({
-      isModalOpen: !this.state.isModalOpen,
+      isModalOpen: !this.state.isModalOpen
     });
   }
 
@@ -48,31 +48,28 @@ class Header extends Component {
 
     console.log(this.props.authState);
 
-    this.props.onChange("logging");
+    this.props.onChange('logging');
 
     console.log(this.props.authState);
 
-    const formData = new FormData();
-    formData.append("email", this.email.value);
-    formData.append("password", this.password.value);
-
     try {
       const res = await axios({
-        url: "http://localhost:8000/api/v1/users/login",
-        method: "POST",
-        data: formData,
+        url: '/api/v1/users/login',
+        method: 'POST',
+        data: {
+          email: this.email.value,
+          password: this.password.value
+        },
         headers: {
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "http://localhost:8000/",
-          "Content-Type": "multipart/form-data",
+          Accept: 'application/json'
         },
 
-        withCredentials: true,
+        withCredentials: true
       });
 
-      if (res.data.status === "success") {
+      if (res.data.status === 'success') {
         // this.toggleModal();
-        this.props.onChange("loggedIn");
+        this.props.onChange('loggedIn');
         console.log(res);
         alert(`Success! Logged in`);
         // console.log(res);
@@ -80,7 +77,7 @@ class Header extends Component {
     } catch (err) {
       // this.toggleModal();
       alert(`Failed!`);
-      this.props.onChange("notLogged");
+      this.props.onChange('notLogged');
       console.log(err);
     }
     // alert(`Username: ${this.username.value} \nPassword: ${this.password.value}
@@ -109,13 +106,12 @@ class Header extends Component {
               <Nav navbar>
                 <NavItem>
                   <NavLink className="nav-link" to="/home">
-                    <span className="fa fa-home fa-lg"></span> Home
+                    <span className="fa fa-home fa-lg" /> Home
                   </NavLink>
                 </NavItem>
                 <NavItem>
                   <NavLink className="nav-link" to="/contact">
-                    <span className="fa fa-address-card fa-lg"></span> Contact
-                    Us
+                    <span className="fa fa-address-card fa-lg" /> Contact Us
                   </NavLink>
                 </NavItem>
               </Nav>
@@ -153,7 +149,7 @@ class Header extends Component {
                   type="text"
                   id="email"
                   name="email"
-                  innerRef={(input) => (this.email = input)}
+                  innerRef={input => (this.email = input)}
                 />
               </FormGroup>
               <FormGroup>
@@ -162,7 +158,7 @@ class Header extends Component {
                   type="password"
                   id="password"
                   name="password"
-                  innerRef={(input) => (this.password = input)}
+                  innerRef={input => (this.password = input)}
                 />
               </FormGroup>
               <Button onClick={this.handleLogin}>Login</Button>
