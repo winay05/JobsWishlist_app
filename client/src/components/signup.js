@@ -1,124 +1,129 @@
-import React from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import axios from 'axios';
 
-import { Link } from 'react-router-dom';
+import React, { Component } from 'react';
 
-const useStyles = makeStyles(theme => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(3)
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2)
+import Spinner from './spinner';
+import SignUpForm from './forms/signupform';
+
+class SignUp extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      fullname: '',
+      email: '',
+      password: '',
+      passwordConfirm: '',
+      isLoading: false,
+      touched: {
+        fullname: false,
+        email: false,
+        password: false,
+        passwordConfirm: false
+      }
+    };
+
+    this.handleSignup = this.handleSignup.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
   }
-}));
+  handleInputChange = event => {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
 
-export default function SignUp() {
-  const classes = useStyles();
+    this.setState({
+      [name]: value
+    });
 
-  return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
+    // console.log(name, value);
+  };
 
-      <div className={classes.paper}>
-        <Grid container justify="center" alignItems="center">
-          <Grid alignContent="flex-end" sm={2}>
-            <Avatar className={classes.avatar}>
-              <LockOutlinedIcon />
-            </Avatar>
-          </Grid>
-          <Grid alignContent="flex-start" sm={9}>
-            <Typography component="h1" variant="h5">
-              Sign up
-            </Typography>
-          </Grid>
-        </Grid>
-        <form className={classes.form} noValidate>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                autoComplete="fullname"
-                name="fullName"
-                variant="outlined"
-                required
-                fullWidth
-                id="fullName"
-                label="Full Name"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="passwordConfirm"
-                label="Confirm Password"
-                type="password"
-                id="passwordConfirm"
-                autoComplete="current-password"
-              />
-            </Grid>
-          </Grid>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={() => {
-              alert('not yet implemented');
-            }}
-          >
-            Sign Up
-          </Button>
-          <Grid container justify="flex-end">
-            <Grid item>
-              <Link to="/signin">Already have an account? Sign in</Link>
-            </Grid>
-          </Grid>
-        </form>
-      </div>
-    </Container>
-  );
+  handleBlur = field => evt => {
+    this.setState({
+      touched: { ...this.state.touched, [field]: true }
+    });
+  };
+
+  validate(fullname, email, password, passwordConfirm) {
+    const errors = {
+      fullname: '',
+      email: '',
+      password: '',
+      passwordConfirm: ''
+    };
+
+    if (this.state.touched.fullname && fullname.length < 3)
+      errors.fullname = 'Name should  be >=3 characters';
+    else if (this.state.touched.fullname && fullname.length > 10)
+      errors.fullname = 'Name should  be <=10 characters';
+
+    const re = /\S+@\S+\.\S+/;
+    if (this.state.touched.email && !re.test(email))
+      errors.email = 'Not a valid email';
+
+    if (this.state.touched.password && password.length < 8)
+      errors.password = 'Password should have >=8 characters';
+
+    if (
+      this.state.touched.password &&
+      this.state.touched.password &&
+      password !== passwordConfirm
+    )
+      errors.passwordConfirm = "Confirm password doesn't match";
+
+    return errors;
+  }
+
+  handleSignup = async event => {
+    event.preventDefault();
+
+    this.setState({ isLoading: !this.state.isLoading });
+
+    try {
+      const res = await axios({
+        url: '/api/v1/users/signup',
+        method: 'POST',
+        data: {
+          name: this.state.fullname,
+          email: this.state.email,
+          password: this.state.password,
+          passwordConfirm: this.state.passwordConfirm
+        },
+        headers: {
+          Accept: 'application/json'
+        },
+
+        withCredentials: true
+      });
+
+      if (res.data.status === 'success') {
+        this.setState({ isLoading: !this.state.isLoading });
+        alert(`Success! Created user with id: ${res.data.data.user._id}`);
+        // console.log(this.state.isLoading);
+      }
+    } catch (err) {
+      this.setState({ isLoading: !this.state.isLoading });
+
+      alert(`Failed! `);
+      // console.log(this.state.isLoading);
+      console.log(err);
+    }
+  };
+
+  render() {
+    return (
+      <>
+        <Spinner isLoading={this.state.isLoading} />
+        <SignUpForm
+          state={this.state}
+          validate={this.validate}
+          handleInputChange={this.handleInputChange}
+          handleSignup={this.handleSignup}
+        />
+      </>
+    );
+  }
 }
+
+export default SignUp;

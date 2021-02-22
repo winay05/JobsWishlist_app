@@ -1,107 +1,79 @@
-import React from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import axios from 'axios';
 
-import { Link } from 'react-router-dom';
+import React, { Component } from 'react';
 
-const useStyles = makeStyles(theme => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1)
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2)
+import Spinner from './spinner';
+import SignInForm from './forms/signinform';
+
+class SignIn extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      email: '',
+      password: '',
+      rememberme: false,
+      isLoading: false
+    };
   }
-}));
+  handleInputChange = event => {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
 
-export default function SignIn() {
-  const classes = useStyles();
+    this.setState({
+      [name]: value
+    });
 
-  return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Grid container justify="center" alignItems="center">
-          <Grid alignContent="flex-end" sm={2}>
-            <Avatar className={classes.avatar}>
-              <LockOutlinedIcon />
-            </Avatar>
-          </Grid>
-          <Grid alignContent="flex-start" sm={9}>
-            <Typography component="h1" variant="h5">
-              Sign in
-            </Typography>
-          </Grid>
-        </Grid>
-        <form className={classes.form} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={() => {
-              alert('not yet implemented');
-            }}
-          >
-            Sign In
-          </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link to="/signup">Don't have an account? Sign Up</Link>
-            </Grid>
-          </Grid>
-        </form>
-      </div>
-    </Container>
-  );
+    // console.log(name, value);
+  };
+
+  handleSignin = async event => {
+    event.preventDefault();
+
+    this.setState({ isLoading: !this.state.isLoading });
+
+    try {
+      const res = await axios({
+        url: '/api/v1/users/login',
+        method: 'POST',
+        data: {
+          email: this.state.email,
+          password: this.state.password
+        },
+        headers: {
+          Accept: 'application/json'
+        },
+
+        withCredentials: true
+      });
+
+      if (res.data.status === 'success') {
+        this.setState({ isLoading: !this.state.isLoading });
+        alert(`Success! Signed In`);
+        // console.log(this.state.isLoading);
+      }
+    } catch (err) {
+      this.setState({ isLoading: !this.state.isLoading });
+
+      alert(`Failed! `);
+      // console.log(this.state.isLoading);
+      console.log(err);
+    }
+  };
+
+  render() {
+    return (
+      <>
+        <Spinner isLoading={this.state.isLoading} />
+        <SignInForm
+          state={this.state}
+          handleInputChange={this.handleInputChange}
+          handleSignin={this.handleSignin}
+        />
+      </>
+    );
+  }
 }
+
+export default SignIn;
