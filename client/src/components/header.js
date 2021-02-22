@@ -19,13 +19,17 @@ import {
   Label
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
+
+import Spinner from './spinner';
+
 class Header extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       isNavOpen: false,
-      isModalOpen: false
+      isModalOpen: false,
+      isLoading: false
     };
     this.toggleNav = this.toggleNav.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
@@ -46,12 +50,7 @@ class Header extends Component {
   async handleLogin(event) {
     event.preventDefault();
 
-    console.log(this.props.authState);
-
-    this.props.onChange('logging');
-
-    console.log(this.props.authState);
-
+    this.setState({ isLoading: !this.state.isLoading });
     try {
       const res = await axios({
         url: '/api/v1/users/login',
@@ -68,21 +67,16 @@ class Header extends Component {
       });
 
       if (res.data.status === 'success') {
-        // this.toggleModal();
-        this.props.onChange('loggedIn');
+        this.setState({ isLoading: !this.state.isLoading });
+
         console.log(res);
         alert(`Success! Logged in`);
-        // console.log(res);
       }
     } catch (err) {
-      // this.toggleModal();
-      alert(`Failed!`);
-      this.props.onChange('notLogged');
+      this.setState({ isLoading: !this.state.isLoading });
       console.log(err);
+      alert(`Failed!`);
     }
-    // alert(`Username: ${this.username.value} \nPassword: ${this.password.value}
-    //         \nRemeber: ${this.remember.checked}`);
-    console.log(this.props.authState);
     this.toggleModal();
 
     event.preventDefault();
@@ -138,7 +132,6 @@ class Header extends Component {
             </div>
           </div>
         </Jumbotron>
-
         <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
           <ModalHeader toggle={this.toggleModal}>Login</ModalHeader>
           <ModalBody>
@@ -163,11 +156,12 @@ class Header extends Component {
               </FormGroup>
               <Button onClick={this.handleLogin}>Login</Button>
               {/* <Button type="submit" value="submit" color="primary">
-                Login
-              </Button> */}
+            Login
+          </Button> */}
             </Form>
           </ModalBody>
         </Modal>
+        <Spinner isLoading={this.state.isLoading} />
       </>
     );
   }
