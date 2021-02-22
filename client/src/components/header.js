@@ -8,7 +8,6 @@ import {
   NavbarToggler,
   Collapse,
   NavItem,
-  Jumbotron,
   Button,
   Modal,
   ModalHeader,
@@ -19,6 +18,7 @@ import {
   Label
 } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import Spinner from './spinner';
 
@@ -83,6 +83,17 @@ class Header extends Component {
   }
 
   render() {
+    // const history = createBrowserHistory();
+
+    const loginButton = (
+      <Nav className="ml-auto" navbar>
+        <NavItem>
+          <Button outline onClick={this.toggleModal}>
+            <span className="fa fa-sign-in fa-lg">Sign in</span>
+          </Button>
+        </NavItem>
+      </Nav>
+    );
     return (
       <>
         <Navbar light expand="md">
@@ -109,31 +120,13 @@ class Header extends Component {
                   </NavLink>
                 </NavItem>
               </Nav>
-              <Nav className="ml-auto" navbar>
-                <NavItem>
-                  <Button outline onClick={this.toggleModal}>
-                    <span className="fa fa-sign-in fa-lg">Login</span>
-                  </Button>
-                </NavItem>
-              </Nav>
+              {/* dont display the login button when on signin page, else, display it */}
+              {window.location.pathname.match(/signin/) ? <p /> : loginButton}
             </Collapse>
           </div>
         </Navbar>
-        <Jumbotron jumbotron color="secondary">
-          <div className="container">
-            <div className="row row-header">
-              <div className="col-12 col-sm-6">
-                <h1>JobsWishlist</h1>
-                <p>
-                  Create a wishlist for jobs you want to watch and we'll let you
-                  know as soon as one opens!
-                </p>
-              </div>
-            </div>
-          </div>
-        </Jumbotron>
         <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
-          <ModalHeader toggle={this.toggleModal}>Login</ModalHeader>
+          <ModalHeader toggle={this.toggleModal}>Sign in</ModalHeader>
           <ModalBody>
             <Form>
               <FormGroup>
@@ -154,10 +147,7 @@ class Header extends Component {
                   innerRef={input => (this.password = input)}
                 />
               </FormGroup>
-              <Button onClick={this.handleLogin}>Login</Button>
-              {/* <Button type="submit" value="submit" color="primary">
-            Login
-          </Button> */}
+              <Button onClick={this.handleLogin}>Sign in</Button>
             </Form>
           </ModalBody>
         </Modal>
@@ -166,4 +156,4 @@ class Header extends Component {
     );
   }
 }
-export default Header;
+export default withRouter(Header);
